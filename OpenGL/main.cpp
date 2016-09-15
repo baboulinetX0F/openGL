@@ -3,6 +3,7 @@
 #include <GLFW\glfw3.h>
 
 #include <iostream>
+#include <fstream>
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -48,6 +49,75 @@ int main(int argc, int argv)
 	glViewport(0, 0, width, height);
 
 	glfwSetKeyCallback(window, key_callback);
+
+	// Test Rendering Data
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.0f, 0.5f, 0.0f
+	};
+
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// Vertex Shader
+	std::ifstream ifs("default.vshader");
+	std::string vertexFile((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	const char* vertexSource = vertexFile.c_str();
+	GLuint vertexShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+	glShaderSource(vertexShader, 1, &vertexSource, NULL);
+	glCompileShader(vertexShader);
+
+	GLint success;
+	GLchar infoLog[512];
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
+	//Fragment Shader
+	ifs = std::ifstream("default.fshader");
+	std::string fragFile((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	const char* fragSource = fragFile.c_str();
+	GLuint fragShader;
+	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(fragShader, 1, &fragSource, NULL);
+	glCompileShader(fragShader);
+	
+	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(fragShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
+	GLuint shaderProgram;
+	shaderProgram = glCreateProgram();
+
+	glAttachShader(shaderProgram, fragShader);
+	glAttachShader(shaderProgram, vertexShader);
+	glLinkProgram(shaderProgram);
+
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
+	}
+
+	glUseProgram(shaderProgram);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragShader);
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
