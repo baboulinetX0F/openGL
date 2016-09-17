@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "Shader.h"
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	// When a user presses the escape key, we set the WindowShouldClose property to true, 
@@ -49,59 +51,8 @@ int main(int argc, int argv)
 	glViewport(0, 0, width, height);
 
 	glfwSetKeyCallback(window, key_callback);
-
-	// Vertex Shader
-	std::ifstream ifs("default.vshader");
-	std::string vertexFile((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-	const char* vertexSource = vertexFile.c_str();
-	GLuint vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-	glShaderSource(vertexShader, 1, &vertexSource, NULL);
-	glCompileShader(vertexShader);
-
-	GLint success;
-	GLchar infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	//Fragment Shader
-	ifs = std::ifstream("default.fshader");
-	std::string fragFile((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-	const char* fragSource = fragFile.c_str();
-	GLuint fragShader;
-	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	glShaderSource(fragShader, 1, &fragSource, NULL);
-	glCompileShader(fragShader);
-
-	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	GLuint shaderProgram;
-	shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, fragShader);
-	glAttachShader(shaderProgram, vertexShader);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
-	}
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragShader);
+	
+	Shader* def = new Shader("default.vert", "default.frag");
 
 	// Test Rendering Data
 	GLfloat vertices[] = {
@@ -136,19 +87,17 @@ int main(int argc, int argv)
 		// Change color uniform var over time
 		GLfloat time = glfwGetTime();
 		GLfloat color = (sin(time) / 2) + 0.5;
-		GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "ourColor");
-		glUseProgram(shaderProgram);
+		GLuint colorUniformLocation = glGetUniformLocation(def->_program, "ourColor");
+		def->Use();
 		glUniform4f(colorUniformLocation, color, 0.0f, 0.0f, 1.0f);
-
-		glUseProgram(shaderProgram);
+				
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);	
 
 		glfwSwapBuffers(window);
 	}
-
-	glDeleteProgram(shaderProgram);
+		
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
 	glfwTerminate();
