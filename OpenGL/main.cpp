@@ -50,28 +50,6 @@ int main(int argc, int argv)
 
 	glfwSetKeyCallback(window, key_callback);
 
-	// Test Rendering Data
-	GLfloat vertices[] = {
-		0.5f,  0.5f, 0.0f,  // Top Right
-		0.5f, -0.5f, 0.0f,  // Bottom Right
-		-0.5f, -0.5f, 0.0f,  // Bottom Left
-		-0.5f,  0.5f, 0.0f   // Top Left 
-	};
-
-	GLuint indices[] = {  
-		0, 1, 3,   
-		1, 2, 3    
-	};
-
-	GLuint VBO;
-	glGenBuffers(1, &VBO);	
-
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
-
-	GLuint EBO;
-	glGenBuffers(1, &EBO);
-
 	// Vertex Shader
 	std::ifstream ifs("default.vshader");
 	std::string vertexFile((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
@@ -101,7 +79,7 @@ int main(int argc, int argv)
 
 	glShaderSource(fragShader, 1, &fragSource, NULL);
 	glCompileShader(fragShader);
-	
+
 	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
@@ -124,19 +102,29 @@ int main(int argc, int argv)
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragShader);
+
+	// Test Rendering Data
+	GLfloat vertices[] = {
+		// First triangle
+		-0.5f, -0.5f, 0.0f,  // Left 
+		0.5f, -0.5f, 0.0f,  // Right
+		0.0f, 0.5f, 0.0f,  // Top		
+	};
 	
+	GLuint VBO;
+	glGenBuffers(1, &VBO);	
+
+	GLuint VAO;
+	glGenVertexArrays(1, &VAO);
 
 	glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	glUseProgram(shaderProgram);
-	
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -145,13 +133,24 @@ int main(int argc, int argv)
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// Change color uniform var over time
+		GLfloat time = glfwGetTime();
+		GLfloat color = (sin(time) / 2) + 0.5;
+		GLuint colorUniformLocation = glGetUniformLocation(shaderProgram, "ourColor");
+		glUseProgram(shaderProgram);
+		glUniform4f(colorUniformLocation, color, 0.0f, 0.0f, 1.0f);
+
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindVertexArray(0);	
 
 		glfwSwapBuffers(window);
 	}
+
+	glDeleteProgram(shaderProgram);
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
 	glfwTerminate();
 	
 	return 0;
