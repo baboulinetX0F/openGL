@@ -27,17 +27,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers sources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.frag">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="default.vert">
+    <None Include="default.vert">
       <Filter>Fichiers sources\Shaders</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

@@ -59,7 +59,7 @@ int main(int argc, int argv)
 	Shader* def = new Shader("default.vert", "default.frag");
 
 	int texWidth, texHeight;
-	unsigned char* image = SOIL_load_image("wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
+	unsigned char* image = SOIL_load_image("textures/wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
 
 	GLuint woodTex;
 	glGenTextures(1, &woodTex);
