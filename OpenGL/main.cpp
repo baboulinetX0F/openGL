@@ -2,6 +2,9 @@
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
 #include <SOIL.h>
+#include <glm.hpp>
+#include <gtc\matrix_transform.hpp>
+#include <gtc\type_ptr.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -51,7 +54,7 @@ int main(int argc, int argv)
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	glfwSetKeyCallback(window, key_callback);
+	glfwSetKeyCallback(window, key_callback);	
 	
 	Shader* def = new Shader("default.vert", "default.frag");
 
@@ -104,8 +107,9 @@ int main(int argc, int argv)
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	GLuint texLocation;
-	glGetUniformLocation(def->_program, "tex");
+	glm::mat4 trans;
+	trans = glm::rotate(trans, 90.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+	trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
@@ -116,6 +120,8 @@ int main(int argc, int argv)
 		glClear(GL_COLOR_BUFFER_BIT);
 			
 		def->Use();
+		GLuint transformLocation = glGetUniformLocation(def->_program, "transform");
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
 		glBindTexture(GL_TEXTURE_2D, woodTex);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
