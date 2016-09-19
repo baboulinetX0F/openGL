@@ -43,6 +43,9 @@ int main(int argc, int argv)
 
 	// Enable glewExperimental for modern techniques
 	glewExperimental = GL_TRUE;
+
+	glEnable(GL_DEPTH_TEST);
+
 	
 	if (glewInit() != GLEW_OK)
 	{
@@ -130,7 +133,9 @@ int main(int argc, int argv)
 	glBindTexture(GL_TEXTURE_2D, 0);	
 
 	glm::mat4 model, view, projection;
-	glm::mat4 transform;	// tmp test transform	
+	
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);	
 	
 	double tmp = glfwGetTime() + 0.05;		
 
@@ -140,16 +145,23 @@ int main(int argc, int argv)
 		glfwPollEvents();
 			
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
-		def->Use();	
+		def->Use();
+		
 		if (glfwGetTime() >= tmp) {
-			GLuint transformLoc = glGetUniformLocation(def->_program, "transform");
-			transform = glm::rotate(transform, 0.15f, glm::vec3(0.1f, 0.1f, 0.0f));
-			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+			GLuint modelLoc = glGetUniformLocation(def->_program, "model");
+			model = glm::rotate(model, 0.15f, glm::vec3(0.1f, 0.1f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			tmp = glfwGetTime() + 0.05;
 		}
-		//projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);		
+		
+		GLuint viewLoc = glGetUniformLocation(def->_program, "view");		
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));		
+
+		GLuint projLoc = glGetUniformLocation(def->_program, "projection");			
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
 		glBindTexture(GL_TEXTURE_2D, woodTex);
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
