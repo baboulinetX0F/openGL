@@ -105,6 +105,19 @@ int main(int argc, int argv)
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
 	GLuint VBO, VAO;
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);
@@ -130,12 +143,7 @@ int main(int argc, int argv)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
-	glBindTexture(GL_TEXTURE_2D, 0);	
-
-	glm::mat4 model, view, projection;
-	
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);	
+	glBindTexture(GL_TEXTURE_2D, 0);			
 	
 	double tmp = glfwGetTime() + 0.05;		
 
@@ -149,12 +157,12 @@ int main(int argc, int argv)
 			
 		def->Use();
 		
-		if (glfwGetTime() >= tmp) {
-			GLuint modelLoc = glGetUniformLocation(def->_program, "model");
-			model = glm::rotate(model, 0.15f, glm::vec3(0.1f, 0.1f, 0.0f));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			tmp = glfwGetTime() + 0.05;
-		}
+		glm::mat4 view, projection;
+
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+
+		GLuint modelLoc = glGetUniformLocation(def->_program, "model");		
 		
 		GLuint viewLoc = glGetUniformLocation(def->_program, "view");		
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));		
@@ -163,8 +171,15 @@ int main(int argc, int argv)
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindTexture(GL_TEXTURE_2D, woodTex);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(VAO);		
+		for (GLuint i = 0; i < 10; i++)
+		{
+			glm::mat4 model;
+			model = glm::rotate(model, 20.0f * i, glm::vec3(1.0f, 0.3f, 0.3f));
+			model = glm::translate(model, cubePositions[i]);
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}		
 		glBindVertexArray(0);	
 
 		glfwSwapBuffers(window);
