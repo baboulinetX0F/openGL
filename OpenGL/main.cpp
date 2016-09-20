@@ -11,12 +11,25 @@
 
 #include "Shader.h"
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+GLfloat cameraSpeed = 0.05f;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	// When a user presses the escape key, we set the WindowShouldClose property to true, 
 	// closing the application
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (key == GLFW_KEY_W)
+		cameraPos += cameraSpeed * cameraFront;
+	if (key == GLFW_KEY_S)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (key == GLFW_KEY_D)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (key == GLFW_KEY_A)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 int main(int argc, int argv)
@@ -143,9 +156,7 @@ int main(int argc, int argv)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
-	glBindTexture(GL_TEXTURE_2D, 0);			
-	
-	double tmp = glfwGetTime() + 0.05;		
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
@@ -158,8 +169,8 @@ int main(int argc, int argv)
 		def->Use();
 		
 		glm::mat4 view, projection;
-
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+					
+		view = glm::lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
 		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 
 		GLuint modelLoc = glGetUniformLocation(def->_program, "model");		
