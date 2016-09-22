@@ -27,13 +27,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -70,11 +70,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\Baboulinet\Programmation\C++\libs\glm\glm;C:\Users\Baboulinet\Programmation\C++\libs\SOIL\src;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Baboulinet\Programmation\C++\libs\SOIL\lib;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\lib;C:\Users\Baboulinet\Programmation\C++\libs\build\src\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\Baboulinet\Programmation\C++\libs\SOIL\lib;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\lib;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\Baboulinet\Programmation\C++\libs\glm\glm;C:\Users\Baboulinet\Programmation\C++\libs\SOIL\src;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Baboulinet\Programmation\C++\libs\SOIL\lib;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\lib;C:\Users\Baboulinet\Programmation\C++\libs\build\src\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\Baboulinet\Programmation\C++\libs\SOIL\lib;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\lib;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,12 +127,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cube.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
