@@ -15,6 +15,10 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 GLfloat cameraSpeed = 0.05f;
+GLfloat lastX = 400, lastY = 300;
+GLfloat sensitivity = 0.05f;
+GLfloat yaw = 0.0f, pitch = 0.0f;
+bool firstMouse = true;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -30,6 +34,38 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	if (key == GLFW_KEY_A)
 		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+	
+	GLfloat x_offset = xpos - lastX;
+	GLfloat y_offset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+	
+	x_offset *= sensitivity;
+	y_offset *= sensitivity;
+
+	yaw += x_offset;
+	pitch += y_offset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+	front.y = glm::sin(glm::radians(pitch));
+	front.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
 }
 
 int main(int argc, int argv)
@@ -58,7 +94,7 @@ int main(int argc, int argv)
 	glewExperimental = GL_TRUE;
 
 	glEnable(GL_DEPTH_TEST);
-
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	
 	if (glewInit() != GLEW_OK)
 	{
@@ -72,6 +108,7 @@ int main(int argc, int argv)
 	glViewport(0, 0, width, height);	
 
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	// Test Rendering Data
 	GLfloat vertices[] = {

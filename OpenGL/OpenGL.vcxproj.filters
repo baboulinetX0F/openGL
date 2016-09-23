@@ -16,6 +16,9 @@
     <Filter Include="Fichiers sources\Shaders">
       <UniqueIdentifier>{30ccac41-d5c5-425d-938d-d0e33e4ec866}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\Textures">
+      <UniqueIdentifier>{2f1a273e-75ea-48e3-aed8-35d89210a70a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -37,5 +40,10 @@
     <None Include="default.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\wood.jpg">
+      <Filter>Fichiers sources\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
