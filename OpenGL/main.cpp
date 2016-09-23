@@ -10,10 +10,10 @@
 #include <fstream>
 
 #include "Shader.h"
+#include "Camera.h"
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+Camera* _cam;
 GLfloat cameraSpeed = 0.05f;
 GLfloat lastX = 400, lastY = 300;
 GLfloat sensitivity = 0.05f;
@@ -27,13 +27,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	if (key == GLFW_KEY_W)
-		cameraPos += cameraSpeed * cameraFront;
+		_cam->processKeyboard(CameraDirection::FORWARD);
 	if (key == GLFW_KEY_S)
-		cameraPos -= cameraSpeed * cameraFront;
+		_cam->processKeyboard(CameraDirection::BACKWARD);
 	if (key == GLFW_KEY_D)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		_cam->processKeyboard(CameraDirection::RIGHT);
 	if (key == GLFW_KEY_A)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		_cam->processKeyboard(CameraDirection::LEFT);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -50,22 +50,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 	
-	x_offset *= sensitivity;
-	y_offset *= sensitivity;
-
-	yaw += x_offset;
-	pitch += y_offset;
-
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-	glm::vec3 front;
-	front.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-	front.y = glm::sin(glm::radians(pitch));
-	front.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
+	_cam->processMouse(x_offset, y_offset);
 }
 
 int main(int argc, int argv)
@@ -182,6 +167,7 @@ int main(int argc, int argv)
 	glBindVertexArray(0);
 	
 	Shader* def = new Shader("default.vert", "default.frag");
+	_cam = new Camera();
 
 	int texWidth, texHeight;
 	unsigned char* image = SOIL_load_image("textures/wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);	
@@ -207,7 +193,7 @@ int main(int argc, int argv)
 		
 		glm::mat4 view, projection;
 					
-		view = glm::lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
+		view = _cam->getViewMatrix();
 		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 
 		GLuint modelLoc = glGetUniformLocation(def->_program, "model");		
