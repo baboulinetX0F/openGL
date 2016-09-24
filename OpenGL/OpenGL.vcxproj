@@ -136,11 +136,12 @@
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.frag" />
-    <None Include="default.vert" />
+    <Image Include="textures\wood.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="textures\wood.jpg" />
+    <None Include="shaders\textured.frag" />
+    <None Include="shaders\textured.vert" />
+    <None Include="shaders\texturedLightTest.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

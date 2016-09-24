@@ -16,7 +16,7 @@
     <Filter Include="Fichiers sources\Shaders">
       <UniqueIdentifier>{30ccac41-d5c5-425d-938d-d0e33e4ec866}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers sources\Textures">
+    <Filter Include="Fichiers de ressources\Textures">
       <UniqueIdentifier>{2f1a273e-75ea-48e3-aed8-35d89210a70a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -40,16 +40,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.frag">
-      <Filter>Fichiers sources\Shaders</Filter>
-    </None>
-    <None Include="default.vert">
-      <Filter>Fichiers sources\Shaders</Filter>
-    </None>
+    <Image Include="textures\wood.jpg">
+      <Filter>Fichiers de ressources\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="textures\wood.jpg">
-      <Filter>Fichiers sources\Textures</Filter>
-    </Image>
+    <None Include="shaders\textured.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\textured.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\texturedLightTest.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

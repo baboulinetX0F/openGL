@@ -14,10 +14,7 @@
 
 
 Camera* _cam;
-GLfloat cameraSpeed = 0.05f;
 GLfloat lastX = 400, lastY = 300;
-GLfloat sensitivity = 0.05f;
-GLfloat yaw = 0.0f, pitch = 0.0f;
 bool firstMouse = true;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -44,12 +41,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		lastY = ypos;
 		firstMouse = false;
 	}
-	
+
 	GLfloat x_offset = xpos - lastX;
 	GLfloat y_offset = lastY - ypos;
 	lastX = xpos;
 	lastY = ypos;
-	
+
 	_cam->processMouse(x_offset, y_offset);
 }
 
@@ -80,7 +77,7 @@ int main(int argc, int argv)
 
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	
+
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "Failed to init GLEW" << glewGetErrorString(glewInit()) << std::endl;
@@ -90,7 +87,7 @@ int main(int argc, int argv)
 	// Get the width and height from GLFW windows and give it to the viewport
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	glViewport(0, 0, width, height);	
+	glViewport(0, 0, width, height);
 
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -138,20 +135,7 @@ int main(int argc, int argv)
 		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
+	};	
 
 	GLuint VBO, VAO;
 	glGenBuffers(1, &VBO);
@@ -165,12 +149,12 @@ int main(int argc, int argv)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
-	
-	Shader* def = new Shader("default.vert", "default.frag");
+
+	Shader* shad = new Shader("shaders/textured.vert", "shaders/textured.frag");
 	_cam = new Camera();
 
 	int texWidth, texHeight;
-	unsigned char* image = SOIL_load_image("textures/wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);	
+	unsigned char* image = SOIL_load_image("textures/wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
 
 	// Load and gen texture
 	GLuint woodTex;
@@ -185,43 +169,40 @@ int main(int argc, int argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-			
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
-		def->Use();
-		
+
+		shad->Use();
+
 		glm::mat4 view, projection;
-					
+
 		view = _cam->getViewMatrix();
 		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 
-		GLuint modelLoc = glGetUniformLocation(def->_program, "model");		
-		
-		GLuint viewLoc = glGetUniformLocation(def->_program, "view");		
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));		
+		GLuint modelLoc = glGetUniformLocation(shad->_program, "model");
 
-		GLuint projLoc = glGetUniformLocation(def->_program, "projection");			
+		GLuint viewLoc = glGetUniformLocation(shad->_program, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+		GLuint projLoc = glGetUniformLocation(shad->_program, "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindTexture(GL_TEXTURE_2D, woodTex);
-		glBindVertexArray(VAO);		
-		for (GLuint i = 0; i < 10; i++)
-		{
-			glm::mat4 model;
-			model = glm::rotate(model, 20.0f * i, glm::vec3(1.0f, 0.3f, 0.3f));
-			model = glm::translate(model, cubePositions[i]);
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}		
-		glBindVertexArray(0);	
+		glBindVertexArray(VAO);	
+		glm::mat4 model;			
+		model = glm::translate(model, glm::vec3(0.0f,0.0f,2.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
+		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 	}
-		
+
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
 	glfwTerminate();
-	
+
 	return 0;
 }
