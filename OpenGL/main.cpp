@@ -150,7 +150,17 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
 
+	GLuint lightVAO;
+	glGenVertexArrays(1, &lightVAO);
+
+	glBindVertexArray(lightVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
+
 	Shader* shad = new Shader("shaders/textured.vert", "shaders/textured.frag");
+	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 
 	int texWidth, texHeight;
@@ -193,8 +203,23 @@ int main(int argc, int argv)
 		glm::mat4 model;			
 		model = glm::translate(model, glm::vec3(0.0f,0.0f,2.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		GLuint lightColorLoc = glGetUniformLocation(shad->_program, "lightColor");
+		glUniform3f(lightColorLoc, 1.0f, 0.5f, 1.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 36);		
+		glBindVertexArray(0);
+
+		lampShader->Use();		
+		modelLoc = glGetUniformLocation(lampShader->_program, "model");
+		viewLoc = glGetUniformLocation(lampShader->_program, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		projLoc = glGetUniformLocation(lampShader->_program, "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+		glBindVertexArray(lightVAO);
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 4.0f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
@@ -202,6 +227,7 @@ int main(int argc, int argv)
 
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
+	glDeleteVertexArrays(1, &lightVAO);
 	glfwTerminate();
 
 	return 0;

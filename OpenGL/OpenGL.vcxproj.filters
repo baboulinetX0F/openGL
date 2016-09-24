@@ -54,5 +54,11 @@
     <None Include="shaders\texturedLightTest.frag">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
+    <None Include="shaders\lamp.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\lamp.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

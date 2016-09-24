@@ -139,6 +139,8 @@
     <Image Include="textures\wood.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\lamp.frag" />
+    <None Include="shaders\lamp.vert" />
     <None Include="shaders\textured.frag" />
     <None Include="shaders\textured.vert" />
     <None Include="shaders\texturedLightTest.frag" />
