@@ -12,7 +12,6 @@ uniform vec3 lightPos;
 
 void main()
 {
-    vec3 objectColor = vec3(1.0f,0.0f,0.0f);
     float ambientStrength = 0.1f;
     vec3 ambient = lightColor * ambientStrength;
 
@@ -21,6 +20,6 @@ void main()
     float diff = max(dot(norm,lightDir),0.0);
     vec3 diffuse = lightColor * diff;
 
-    vec3 result = (ambient + diffuse) * objectColor;
-    color = vec4(result, 1.0f);
+    vec3 result = (ambient + diffuse);
+    color = texture(tex,texCord) * vec4(result, 1.0f);
 }

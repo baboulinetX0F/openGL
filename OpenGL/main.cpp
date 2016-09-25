@@ -16,6 +16,9 @@ Camera* _cam;
 GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
 
+// test variables
+glm::vec3 lightPos = glm::vec3(3.0f, 0.0f, -1.0f);
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	// When a user presses the escape key, we set the WindowShouldClose property to true, 
@@ -30,6 +33,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		_cam->processKeyboard(CameraDirection::RIGHT);
 	if (key == GLFW_KEY_A)
 		_cam->processKeyboard(CameraDirection::LEFT);
+
+	// Test move command lamp
+	if (key == GLFW_KEY_RIGHT)
+		lightPos += glm::vec3(0.1f, 0.0f, 0.0f);
+	if (key == GLFW_KEY_LEFT)
+		lightPos -= glm::vec3(0.1f, 0.0f, 0.0f);
+	if (key == GLFW_KEY_UP)
+		lightPos += glm::vec3(0.0f, 0.1f, 0.0f);
+	if (key == GLFW_KEY_DOWN)
+		lightPos -= glm::vec3(0.0f, 0.1f, 0.0f);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -149,7 +162,7 @@ int main(int argc, int argv)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 
 	GLuint lightVAO;
@@ -159,9 +172,7 @@ int main(int argc, int argv)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
-	glm::vec3 lightPos = glm::vec3(1.0f, 0.0f, -1.0f);
+	glBindVertexArray(0);	
 
 	Shader* shad = new Shader("shaders/phongLightingTex.vert", "shaders/phongLightingTex.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
