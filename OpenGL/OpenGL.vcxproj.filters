@@ -60,7 +60,10 @@
     <None Include="shaders\lamp.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
-    <None Include="shaders\ambientLighting.frag">
+    <None Include="shaders\phongLightingTex.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\phongLightingTex.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
   </ItemGroup>

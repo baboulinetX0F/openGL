@@ -161,14 +161,15 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-	Shader* shad = new Shader("shaders/textured.vert", "shaders/ambientLighting.frag");
+	glm::vec3 lightPos = glm::vec3(1.0f, 0.0f, -1.0f);
+
+	Shader* shad = new Shader("shaders/phongLightingTex.vert", "shaders/phongLightingTex.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 
+	// Load and gen texture
 	int texWidth, texHeight;
 	unsigned char* image = SOIL_load_image("textures/wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
-
-	// Load and gen texture
 	GLuint woodTex;
 	glGenTextures(1, &woodTex);
 	glBindTexture(GL_TEXTURE_2D, woodTex);
@@ -186,6 +187,9 @@ int main(int argc, int argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shad->Use();
+
+		GLint lightPosLoc = glGetUniformLocation(shad->_program, "lightPos");
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 
 		glm::mat4 view, projection;
 
@@ -206,7 +210,7 @@ int main(int argc, int argv)
 		model = glm::translate(model, glm::vec3(0.0f,0.0f,2.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		GLuint lightColorLoc = glGetUniformLocation(shad->_program, "lightColor");
-		glUniform3f(lightColorLoc, 1.0f, 0.5f, 1.0f);
+		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 36);		
 		glBindVertexArray(0);
 
@@ -218,7 +222,7 @@ int main(int argc, int argv)
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(lightVAO);
-		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 4.0f));
+		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
