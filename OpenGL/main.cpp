@@ -159,7 +159,7 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-	Shader* shad = new Shader("shaders/textured.vert", "shaders/textured.frag");
+	Shader* shad = new Shader("shaders/textured.vert", "shaders/ambientLighting.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 

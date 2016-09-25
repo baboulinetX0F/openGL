@@ -60,5 +60,8 @@
     <None Include="shaders\lamp.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
+    <None Include="shaders\ambientLighting.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
