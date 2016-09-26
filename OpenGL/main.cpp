@@ -53,7 +53,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		lastY = ypos;
 		firstMouse = false;
 	}
-
 	GLfloat x_offset = xpos - lastX;
 	GLfloat y_offset = lastY - ypos;
 	lastX = xpos;
@@ -174,7 +173,7 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);	
 
-	Shader* shad = new Shader("shaders/phongLightingTex.vert", "shaders/phongLightingTex.frag");
+	Shader* shad = new Shader("shaders/materialPhong.vert", "shaders/materialPhong.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 
@@ -189,17 +188,36 @@ int main(int argc, int argv)
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	// Uniform Lighting Shader Location
+	GLint matAmbientLoc = glGetUniformLocation(shad->_program, "material.ambient");
+	GLint matDiffuseLoc = glGetUniformLocation(shad->_program, "material.diffuse");
+	GLint matSpecularLoc = glGetUniformLocation(shad->_program, "material.specular");
+	GLint matShineLoc = glGetUniformLocation(shad->_program, "material.shininess");
+
+	GLint lightAmbientLoc = glGetUniformLocation(shad->_program, "light.ambient");
+	GLint lightDiffuseLoc = glGetUniformLocation(shad->_program, "light.diffuse");
+	GLint lightSpecularLoc = glGetUniformLocation(shad->_program, "light.specular");	
+
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+				
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shad->Use();
+		shad->Use();	
 
-		GLint lightPosLoc = glGetUniformLocation(shad->_program, "lightPos");
+		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
+		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
+		glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
+		glUniform1f(matShineLoc, 32.0f);
+
+		glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
+		glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f); // Let's darken the light a bit to fit the scene
+		glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+
+		GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 
 		glm::mat4 view, projection;
@@ -220,8 +238,6 @@ int main(int argc, int argv)
 		glm::mat4 model;			
 		model = glm::translate(model, glm::vec3(0.0f,0.0f,2.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		GLuint lightColorLoc = glGetUniformLocation(shad->_program, "lightColor");
-		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 36);		
 		glBindVertexArray(0);
 
