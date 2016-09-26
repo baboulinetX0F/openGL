@@ -17,7 +17,7 @@ GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
 
 // test variables
-glm::vec3 lightPos = glm::vec3(3.0f, 0.0f, -1.0f);
+glm::vec3 lightPos = glm::vec3(0.0f, 1.0f, 0.0f);
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
