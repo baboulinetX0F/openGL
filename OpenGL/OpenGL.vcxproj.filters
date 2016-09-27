@@ -46,6 +46,9 @@
     <Image Include="textures\container.png">
       <Filter>Fichiers de ressources\Textures</Filter>
     </Image>
+    <Image Include="textures\container_specular.png">
+      <Filter>Fichiers de ressources\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\textured.frag">
@@ -73,6 +76,18 @@
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
     <None Include="shaders\materialPhong.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\materialLightMap.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\materialLightMap.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\materialLightSpecularMap.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\materialLightSpecularMap.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
   </ItemGroup>

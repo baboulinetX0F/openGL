@@ -137,11 +137,16 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\container.png" />
+    <Image Include="textures\container_specular.png" />
     <Image Include="textures\wood.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\lamp.frag" />
     <None Include="shaders\lamp.vert" />
+    <None Include="shaders\materialLightMap.frag" />
+    <None Include="shaders\materialLightMap.vert" />
+    <None Include="shaders\materialLightSpecularMap.frag" />
+    <None Include="shaders\materialLightSpecularMap.vert" />
     <None Include="shaders\materialPhong.frag" />
     <None Include="shaders\materialPhong.vert" />
     <None Include="shaders\phongLightingTex.frag" />

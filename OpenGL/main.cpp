@@ -103,7 +103,6 @@ int main(int argc, int argv)
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	// Test Rendering Data
 	// data pattern : [(vec3) vertex | (vec2) texCoord | (vec3) normalVector]
 	GLfloat vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
@@ -173,18 +172,23 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);	
 
-	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/materialLightSpecularMap.frag");
-	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 
-	// Load and gen texture
-	int texWidth, texHeight;
-	unsigned char* image = SOIL_load_image("textures/container.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/materialLSEMap.frag");
+	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
+	
 	GLuint woodTex;
 	GLuint specularWoodTex;
+	GLuint emissionMap;
 	glGenTextures(1, &woodTex);
 	glGenTextures(1, &specularWoodTex);
+	glGenTextures(1, &emissionMap);
 
+	int texWidth, texHeight;
+	unsigned char* image;
+
+	// Lightmap Texture
+	image = SOIL_load_image("textures/container.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 	glBindTexture(GL_TEXTURE_2D, woodTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -194,10 +198,22 @@ int main(int argc, int argv)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
+	// Specular Map Texture
 	glBindTexture(GL_TEXTURE_2D, specularWoodTex);
 	image = SOIL_load_image("textures/container_specular.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);	
+	SOIL_free_image_data(image);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
+	// Emission Map Texture
+	glBindTexture(GL_TEXTURE_2D, emissionMap);
+	image = SOIL_load_image("textures/matrix_emission.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -215,26 +231,30 @@ int main(int argc, int argv)
 	GLint lightDiffuseLoc = glGetUniformLocation(shad->_program, "light.diffuse");
 	GLint lightSpecularLoc = glGetUniformLocation(shad->_program, "light.specular");	
 
+	// Apply uniforms who doesn't need to be updated at each draw call
+	shad->Use();
+	glUniform1i(glGetUniformLocation(shad->_program, "material.diffuse"), 0);
+	glUniform1i(glGetUniformLocation(shad->_program, "material.specular"), 1);
+	glUniform1i(glGetUniformLocation(shad->_program, "material.emission"), 2);
+
+	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
+	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
+	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
+	glUniform1f(matShineLoc, 32.0f);
+
+	glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
+	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
+	glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 				
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shad->Use();
-		glUniform1i(glGetUniformLocation(shad->_program, "material.diffuse"), 0);
-		glUniform1i(glGetUniformLocation(shad->_program, "material.specular"), 1);
-
-		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
-		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
-		glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
-		glUniform1f(matShineLoc, 32.0f);
-
-		glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
-		glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f); // Let's darken the light a bit to fit the scene
-		glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
 
 		GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
@@ -257,6 +277,9 @@ int main(int argc, int argv)
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularWoodTex);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
 
 		glBindVertexArray(VAO);	
 		glm::mat4 model;			
