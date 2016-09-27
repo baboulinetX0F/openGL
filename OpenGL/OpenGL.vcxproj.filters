@@ -93,5 +93,11 @@
     <None Include="shaders\materialLSEMap.frag">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
+    <None Include="shaders\light_casters\baseLighting.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\light_casters\directionalLighting.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

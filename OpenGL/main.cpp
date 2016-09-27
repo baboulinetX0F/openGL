@@ -187,7 +187,7 @@ int main(int argc, int argv)
 
 	_cam = new Camera();
 
-	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/light_casters/directionalLighting.frag");
+	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/light_casters/pointLight.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	
 	GLuint woodTex;
@@ -250,6 +250,10 @@ int main(int argc, int argv)
 	glUniform1i(glGetUniformLocation(shad->_program, "material.specular"), 1);
 	glUniform1i(glGetUniformLocation(shad->_program, "material.emission"), 2);
 
+	glUniform1f(glGetUniformLocation(shad->_program, "light.constant"), 1.0f);
+	glUniform1f(glGetUniformLocation(shad->_program, "light.linear"), 0.09);
+	glUniform1f(glGetUniformLocation(shad->_program, "light.quadratic"), 0.032);
+
 	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
@@ -257,7 +261,7 @@ int main(int argc, int argv)
 
 	glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
 	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
-	glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+	glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);	
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
@@ -269,11 +273,11 @@ int main(int argc, int argv)
 
 		shad->Use();
 
-		/*GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);*/
+		GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 
-		GLint lightDirPos = glGetUniformLocation(shad->_program, "light.direction");
-		glUniform3f(lightDirPos, -0.2f, -1.0f, -0.3f);
+		/*GLint lightDirPos = glGetUniformLocation(shad->_program, "light.direction");
+		glUniform3f(lightDirPos, -0.2f, -1.0f, -0.3f);*/
 
 		glm::mat4 view, projection;
 
