@@ -43,6 +43,9 @@
     <Image Include="textures\wood.jpg">
       <Filter>Fichiers de ressources\Textures</Filter>
     </Image>
+    <Image Include="textures\container.png">
+      <Filter>Fichiers de ressources\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\textured.frag">
@@ -64,6 +67,12 @@
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
     <None Include="shaders\phongLightingTex.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\materialPhong.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\materialPhong.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
   </ItemGroup>

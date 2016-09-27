@@ -173,13 +173,13 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);	
 
-	Shader* shad = new Shader("shaders/materialPhong.vert", "shaders/materialPhong.frag");
+	Shader* shad = new Shader("shaders/materialLightMap.vert", "shaders/materialLightMap.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 
 	// Load and gen texture
 	int texWidth, texHeight;
-	unsigned char* image = SOIL_load_image("textures/wood.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
+	unsigned char* image = SOIL_load_image("textures/container.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 	GLuint woodTex;
 	glGenTextures(1, &woodTex);
 	glBindTexture(GL_TEXTURE_2D, woodTex);
@@ -233,6 +233,9 @@ int main(int argc, int argv)
 		GLuint projLoc = glGetUniformLocation(shad->_program, "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+		glUniform1i(glGetUniformLocation(shad->_program, "material.diffuse"), 0);
+
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, woodTex);
 		glBindVertexArray(VAO);	
 		glm::mat4 model;			

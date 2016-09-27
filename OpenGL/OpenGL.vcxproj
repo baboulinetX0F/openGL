@@ -136,11 +136,14 @@
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\container.png" />
     <Image Include="textures\wood.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\lamp.frag" />
     <None Include="shaders\lamp.vert" />
+    <None Include="shaders\materialPhong.frag" />
+    <None Include="shaders\materialPhong.vert" />
     <None Include="shaders\phongLightingTex.frag" />
     <None Include="shaders\phongLightingTex.vert" />
     <None Include="shaders\textured.frag" />
