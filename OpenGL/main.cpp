@@ -173,7 +173,7 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);	
 
-	Shader* shad = new Shader("shaders/materialLightMap.vert", "shaders/materialLightMap.frag");
+	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/materialLightSpecularMap.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	_cam = new Camera();
 
@@ -181,11 +181,28 @@ int main(int argc, int argv)
 	int texWidth, texHeight;
 	unsigned char* image = SOIL_load_image("textures/container.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
 	GLuint woodTex;
+	GLuint specularWoodTex;
 	glGenTextures(1, &woodTex);
+	glGenTextures(1, &specularWoodTex);
+
 	glBindTexture(GL_TEXTURE_2D, woodTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, specularWoodTex);
+	image = SOIL_load_image("textures/container_specular.png", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);	
+	SOIL_free_image_data(image);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Uniform Lighting Shader Location
@@ -204,9 +221,11 @@ int main(int argc, int argv)
 		glfwPollEvents();
 				
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 
-		shad->Use();	
+		shad->Use();
+		glUniform1i(glGetUniformLocation(shad->_program, "material.diffuse"), 0);
+		glUniform1i(glGetUniformLocation(shad->_program, "material.specular"), 1);
 
 		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
@@ -231,12 +250,14 @@ int main(int argc, int argv)
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
 		GLuint projLoc = glGetUniformLocation(shad->_program, "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-		glUniform1i(glGetUniformLocation(shad->_program, "material.diffuse"), 0);
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));		
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, woodTex);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularWoodTex);
+
 		glBindVertexArray(VAO);	
 		glm::mat4 model;			
 		model = glm::translate(model, glm::vec3(0.0f,0.0f,2.0f));
