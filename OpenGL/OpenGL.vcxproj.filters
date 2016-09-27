@@ -90,5 +90,8 @@
     <None Include="shaders\materialLightSpecularMap.vert">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
+    <None Include="shaders\materialLSEMap.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

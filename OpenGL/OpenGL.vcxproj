@@ -147,6 +147,7 @@
     <None Include="shaders\materialLightMap.vert" />
     <None Include="shaders\materialLightSpecularMap.frag" />
     <None Include="shaders\materialLightSpecularMap.vert" />
+    <None Include="shaders\materialLSEMap.frag" />
     <None Include="shaders\materialPhong.frag" />
     <None Include="shaders\materialPhong.vert" />
     <None Include="shaders\phongLightingTex.frag" />
