@@ -247,6 +247,7 @@ int main(int argc, int argv)
 	GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
 	GLint lightSpotdirLoc = glGetUniformLocation(shad->_program, "light.direction");
 	GLint lightSpotCutOffLoc = glGetUniformLocation(shad->_program, "light.cutOff");
+	GLint lightSpotOuterCutOffLoc = glGetUniformLocation(shad->_program, "light.outerCutOff");
 
 	// Apply uniforms who doesn't need to be updated at each draw call
 	shad->Use();
@@ -279,6 +280,7 @@ int main(int argc, int argv)
 		glUniform3f(lightPosLoc, _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
 		glUniform3f(lightSpotdirLoc, _cam->_front.x, _cam->_front.y, _cam->_front.z);
 		glUniform1f(lightSpotCutOffLoc, glm::cos(glm::radians(12.5f)));
+		glUniform1f(lightSpotOuterCutOffLoc, glm::cos(glm::radians(17.5f)));
 
 		/*GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);*/
