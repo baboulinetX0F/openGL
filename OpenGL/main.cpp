@@ -187,7 +187,7 @@ int main(int argc, int argv)
 
 	_cam = new Camera();
 
-	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/light_casters/pointLight.frag");
+	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/light_casters/spotLight.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	
 	GLuint woodTex;
@@ -242,7 +242,11 @@ int main(int argc, int argv)
 
 	GLint lightAmbientLoc = glGetUniformLocation(shad->_program, "light.ambient");
 	GLint lightDiffuseLoc = glGetUniformLocation(shad->_program, "light.diffuse");
-	GLint lightSpecularLoc = glGetUniformLocation(shad->_program, "light.specular");	
+	GLint lightSpecularLoc = glGetUniformLocation(shad->_program, "light.specular");
+
+	GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
+	GLint lightSpotdirLoc = glGetUniformLocation(shad->_program, "light.direction");
+	GLint lightSpotCutOffLoc = glGetUniformLocation(shad->_program, "light.cutOff");
 
 	// Apply uniforms who doesn't need to be updated at each draw call
 	shad->Use();
@@ -272,9 +276,12 @@ int main(int argc, int argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shad->Use();
+		glUniform3f(lightPosLoc, _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
+		glUniform3f(lightSpotdirLoc, _cam->_front.x, _cam->_front.y, _cam->_front.z);
+		glUniform1f(lightSpotCutOffLoc, glm::cos(glm::radians(12.5f)));
 
-		GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		/*GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);*/
 
 		/*GLint lightDirPos = glGetUniformLocation(shad->_program, "light.direction");
 		glUniform3f(lightDirPos, -0.2f, -1.0f, -0.3f);*/
