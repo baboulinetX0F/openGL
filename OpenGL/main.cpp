@@ -160,6 +160,13 @@ int main(int argc, int argv)
 		glm::vec3(1.5f, 0.2f, -1.5f),
 		glm::vec3(-1.3f, 1.0f, -1.5f)
 	};
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(0.7f, 0.2f, 2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f, 2.0f, -12.0f),
+		glm::vec3(0.0f, 0.0f, -3.0f)
+	};
+
 
 	GLuint VBO, VAO;
 	glGenBuffers(1, &VBO);
@@ -187,15 +194,14 @@ int main(int argc, int argv)
 
 	_cam = new Camera();
 
-	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/light_casters/spotLight.frag");
+	Shader* shad = new Shader("shaders/materialLightSpecularMap.vert", "shaders/light_casters/materialAllLights.frag");
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	
 	GLuint woodTex;
 	GLuint specularWoodTex;
-	//GLuint emissionMap;
+	
 	glGenTextures(1, &woodTex);
-	glGenTextures(1, &specularWoodTex);
-	//glGenTextures(1, &emissionMap);
+	glGenTextures(1, &specularWoodTex);	
 
 	int texWidth, texHeight;
 	unsigned char* image;
@@ -222,16 +228,6 @@ int main(int argc, int argv)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
-	// Emission Map Texture
-	/* glBindTexture(GL_TEXTURE_2D, emissionMap);
-	image = SOIL_load_image("textures/matrix_emission.jpg", &texWidth, &texHeight, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SOIL_free_image_data(image);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST); */
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Uniform Lighting Shader Location
@@ -240,33 +236,25 @@ int main(int argc, int argv)
 	GLint matSpecularLoc = glGetUniformLocation(shad->_program, "material.specular");
 	GLint matShineLoc = glGetUniformLocation(shad->_program, "material.shininess");
 
-	GLint lightAmbientLoc = glGetUniformLocation(shad->_program, "light.ambient");
-	GLint lightDiffuseLoc = glGetUniformLocation(shad->_program, "light.diffuse");
-	GLint lightSpecularLoc = glGetUniformLocation(shad->_program, "light.specular");
-
-	GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
-	GLint lightSpotdirLoc = glGetUniformLocation(shad->_program, "light.direction");
-	GLint lightSpotCutOffLoc = glGetUniformLocation(shad->_program, "light.cutOff");
-	GLint lightSpotOuterCutOffLoc = glGetUniformLocation(shad->_program, "light.outerCutOff");
+	GLint dirlightAmbientLoc = glGetUniformLocation(shad->_program, "dirLight.ambient");
+	GLint dirlightDiffuseLoc = glGetUniformLocation(shad->_program, "dirLight.diffuse");
+	GLint dirlightSpecularLoc = glGetUniformLocation(shad->_program, "dirLight.specular");	
 
 	// Apply uniforms who doesn't need to be updated at each draw call
 	shad->Use();
 	glUniform1i(glGetUniformLocation(shad->_program, "material.diffuse"), 0);
 	glUniform1i(glGetUniformLocation(shad->_program, "material.specular"), 1);
 	glUniform1i(glGetUniformLocation(shad->_program, "material.emission"), 2);
-
-	glUniform1f(glGetUniformLocation(shad->_program, "light.constant"), 1.0f);
-	glUniform1f(glGetUniformLocation(shad->_program, "light.linear"), 0.09);
-	glUniform1f(glGetUniformLocation(shad->_program, "light.quadratic"), 0.032);
-
+	
 	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
 	glUniform1f(matShineLoc, 32.0f);
 
-	glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
-	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
-	glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);	
+	glUniform3f(glGetUniformLocation(shad->_program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
+	glUniform3f(dirlightAmbientLoc, 0.2f, 0.2f, 0.2f);
+	glUniform3f(dirlightDiffuseLoc, 0.5f, 0.5f, 0.5f);
+	glUniform3f(dirlightSpecularLoc, 1.0f, 1.0f, 1.0f);	
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
@@ -276,17 +264,39 @@ int main(int argc, int argv)
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shad->Use();
-		glUniform3f(lightPosLoc, _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
-		glUniform3f(lightSpotdirLoc, _cam->_front.x, _cam->_front.y, _cam->_front.z);
-		glUniform1f(lightSpotCutOffLoc, glm::cos(glm::radians(12.5f)));
-		glUniform1f(lightSpotOuterCutOffLoc, glm::cos(glm::radians(17.5f)));
+		shad->Use();	
 
-		/*GLint lightPosLoc = glGetUniformLocation(shad->_program, "light.position");
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);*/
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[0].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[0].linear"), 0.09);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[0].quadratic"), 0.032);
 
-		/*GLint lightDirPos = glGetUniformLocation(shad->_program, "light.direction");
-		glUniform3f(lightDirPos, -0.2f, -1.0f, -0.3f);*/
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[1].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[1].linear"), 0.09);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[1].quadratic"), 0.032);
+
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[2].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[2].linear"), 0.09);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[2].quadratic"), 0.032);
+
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
+		glUniform3f(glGetUniformLocation(shad->_program, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[3].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[3].linear"), 0.09);
+		glUniform1f(glGetUniformLocation(shad->_program, "pointLights[3].quadratic"), 0.032);
 
 		glm::mat4 view, projection;
 
@@ -305,13 +315,9 @@ int main(int argc, int argv)
 		glBindTexture(GL_TEXTURE_2D, woodTex);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularWoodTex);
-
-		/*glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, emissionMap);*/
+		glBindTexture(GL_TEXTURE_2D, specularWoodTex);	
 
 		glm::mat4 model;
-
 		glBindVertexArray(VAO);
 		for (int i = 0; i < 10; i++)
 		{			
@@ -332,11 +338,14 @@ int main(int argc, int argv)
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(lightVAO);
-		model = glm::mat4();
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (int i = 0; i < 4; i++)
+		{
+			model = glm::mat4();
+			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
