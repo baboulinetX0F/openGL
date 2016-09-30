@@ -60,10 +60,19 @@ void Mesh::Draw(Shader shader)
 		glUniform1f(glGetUniformLocation(shader._program, ("material." + name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, this->_textures[i].id);
 	}
+
+	glUniform1f(glGetUniformLocation(shader._program, "material.shininess"), 16.0f);
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw mesh
 	glBindVertexArray(this->_VAO);
 	glDrawElements(GL_TRIANGLES, this->_indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+
+	for (GLuint i = 0; i < this->_textures.size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 }
