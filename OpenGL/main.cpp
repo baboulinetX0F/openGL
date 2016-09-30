@@ -73,7 +73,7 @@ int main(int argc, int argv)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Learning", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(800, 600, "openGL", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW Window\n";
@@ -192,11 +192,22 @@ int main(int argc, int argv)
 	// Wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	
+	double lastTime = glfwGetTime();
+	int nbFrames = 0;
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
 	{
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if (currentTime - lastTime >= 1.0){ // If last prinf() was more than 1 sec ago
+			// printf and reset timer
+			double frameTime = 1000.0 / double(nbFrames);
+			glfwSetWindowTitle(window, ("openGL Frame time : " + std::to_string(frameTime) + " FPS : " + std::to_string(1000/frameTime)).c_str());
+			nbFrames = 0;
+			lastTime += 1.0;
+		}
+		
 		glfwPollEvents();
 				
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
