@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "Shader.h"
 #include "Camera.h"
@@ -18,7 +19,7 @@ GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
 
 // test variables
-glm::vec3 lightPos = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 mdlPos = glm::vec3(0.0f, 1.0f, 0.0f);
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -37,13 +38,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	// Test move command lamp
 	if (key == GLFW_KEY_RIGHT)
-		lightPos += glm::vec3(0.1f, 0.0f, 0.0f);
+		mdlPos += glm::vec3(0.1f, 0.0f, 0.0f);
 	if (key == GLFW_KEY_LEFT)
-		lightPos -= glm::vec3(0.1f, 0.0f, 0.0f);
+		mdlPos -= glm::vec3(0.1f, 0.0f, 0.0f);
 	if (key == GLFW_KEY_UP)
-		lightPos += glm::vec3(0.0f, 0.1f, 0.0f);
+		mdlPos += glm::vec3(0.0f, 0.1f, 0.0f);
 	if (key == GLFW_KEY_DOWN)
-		lightPos -= glm::vec3(0.0f, 0.1f, 0.0f);
+		mdlPos -= glm::vec3(0.0f, 0.1f, 0.0f);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -184,7 +185,7 @@ int main(int argc, int argv)
 	_cam = new Camera();
 
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
-	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/default.frag");	
+	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/mdlLight.frag");	
 		
 
 	Model nanosuit = Model("models/nanosuit/nanosuit.obj");
@@ -249,8 +250,29 @@ int main(int argc, int argv)
 		projLoc = glGetUniformLocation(mdlShad._program, "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+		glUniform3f(glGetUniformLocation(mdlShad._program, "viewPos"), _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
+
+		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
+		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+
+		for (int i = 0; i < 4; i++)
+		{
+			std::ostringstream oss;
+			oss << "pointLights[" << i << "].";
+			std::string tmp = oss.str();
+			glUniform3f(glGetUniformLocation(mdlShad._program, (tmp + std::string("position")).c_str()), pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);			
+			glUniform3f(glGetUniformLocation(mdlShad._program, (tmp + std::string("ambient")).c_str()), 0.05f, 0.05f, 0.05f);
+			glUniform3f(glGetUniformLocation(mdlShad._program, (tmp + std::string("diffuse")).c_str()), 0.8f, 0.8f, 0.8f);
+			glUniform3f(glGetUniformLocation(mdlShad._program, (tmp + std::string("specular")).c_str()), 1.0f, 1.0f, 1.0f);
+			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("constant")).c_str()), 1.0f);
+			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("linear")).c_str()), 0.09);
+			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("quadratic")).c_str()), 0.032);
+		}
+		
 		model = glm::mat4();
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::translate(model, mdlPos);
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
