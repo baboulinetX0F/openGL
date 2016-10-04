@@ -215,18 +215,21 @@ int main(int argc, int argv)
 	{	
 		
 		glfwPollEvents();
-		ImGui_ImplGlfwGL3_NewFrame();
+		ImGui_ImplGlfwGL3_NewFrame(!debug_window);
 
+		//TODO: Remove cursor when debug window is not displayed 
 		if (debug_window)
 		{
 			//static float f = 0.0f;
-			ImGui::Text("Hello, world!");
+			//ImGui::Text("Hello, world!");
 			//ImGui::SliderFloat("float", &f, 0.0f, 1.0f);			
 			ImGui::ColorEdit3("clear color", (float*)&clear_color);
 			//if (ImGui::Button("Test Window")) show_test_window ^= 1;
 			//if (ImGui::Button("Another Window")) show_another_window ^= 1;
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		}
+		else
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 				
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
@@ -284,8 +287,8 @@ int main(int argc, int argv)
 			glUniform3f(glGetUniformLocation(mdlShad._program, (tmp + std::string("diffuse")).c_str()), 0.8f, 0.8f, 0.8f);
 			glUniform3f(glGetUniformLocation(mdlShad._program, (tmp + std::string("specular")).c_str()), 1.0f, 1.0f, 1.0f);
 			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("constant")).c_str()), 1.0f);
-			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("linear")).c_str()), 0.09);
-			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("quadratic")).c_str()), 0.032);
+			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("linear")).c_str()), 0.09f);
+			glUniform1f(glGetUniformLocation(mdlShad._program, (tmp + std::string("quadratic")).c_str()), 0.032f);
 		}
 		
 		model = glm::mat4();
