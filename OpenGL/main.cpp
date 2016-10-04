@@ -1,10 +1,15 @@
 #define GLEW_STATIC
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
+
 #include <SOIL.h>
+
 #include <glm.hpp>
 #include <gtc\matrix_transform.hpp>
 #include <gtc\type_ptr.hpp>
+
+#include <imgui.h>
+#include <imgui_impl_glfw_gl3.h>
 
 #include <iostream>
 #include <fstream>
@@ -20,6 +25,7 @@ bool firstMouse = true;
 
 // test variables
 glm::vec3 mdlPos = glm::vec3(0.0f, 1.0f, 0.0f);
+bool debug_window = false;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -45,6 +51,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		mdlPos += glm::vec3(0.0f, 0.1f, 0.0f);
 	if (key == GLFW_KEY_DOWN)
 		mdlPos -= glm::vec3(0.0f, 0.1f, 0.0f);
+
+	// Debug Window
+	if (key == GLFW_KEY_F10 && action == GLFW_PRESS)
+	{
+		debug_window = !debug_window;		
+	}
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -87,6 +99,8 @@ int main(int argc, int argv)
 
 	// Enable glewExperimental for modern techniques
 	glewExperimental = GL_TRUE;
+
+	ImGui_ImplGlfwGL3_Init(window, true);
 
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -189,29 +203,32 @@ int main(int argc, int argv)
 		
 
 	Model nanosuit = Model("models/nanosuit/nanosuit.obj");
-	
-	// Wireframe mode
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	double lastTime = glfwGetTime();
-	int nbFrames = 0;
+	// debug options
+	ImVec4 clear_color = ImColor(25, 25, 25);
+		
+	// Wireframe mode
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
-	{
-		double currentTime = glfwGetTime();
-		nbFrames++;
-		if (currentTime - lastTime >= 1.0){ // If last prinf() was more than 1 sec ago
-			// printf and reset timer
-			double frameTime = 1000.0 / double(nbFrames);
-			glfwSetWindowTitle(window, ("openGL Frame time : " + std::to_string(frameTime) + " FPS : " + std::to_string(1000/frameTime)).c_str());
-			nbFrames = 0;
-			lastTime += 1.0;
-		}
+	{	
 		
 		glfwPollEvents();
+		ImGui_ImplGlfwGL3_NewFrame();
+
+		if (debug_window)
+		{
+			//static float f = 0.0f;
+			ImGui::Text("Hello, world!");
+			//ImGui::SliderFloat("float", &f, 0.0f, 1.0f);			
+			ImGui::ColorEdit3("clear color", (float*)&clear_color);
+			//if (ImGui::Button("Test Window")) show_test_window ^= 1;
+			//if (ImGui::Button("Another Window")) show_another_window ^= 1;
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		}
 				
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
 		glm::mat4 view, projection, model;		
@@ -277,6 +294,7 @@ int main(int argc, int argv)
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		nanosuit.Draw(mdlShad);
+		ImGui::Render();
 
 		glfwSwapBuffers(window);
 	}
@@ -285,6 +303,7 @@ int main(int argc, int argv)
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
 	glfwTerminate();
+	ImGui_ImplGlfwGL3_Shutdown();
 
 	return 0;
 }
