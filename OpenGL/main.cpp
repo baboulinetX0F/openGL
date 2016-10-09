@@ -75,6 +75,32 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	_cam->processMouse(x_offset, y_offset);
 }
 
+GLuint loadCubemap(std::vector<const char*> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glActiveTexture(GL_TEXTURE0);
+
+	int width, height;
+	unsigned char* image;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	for (GLint i = 0; i < faces.size(); i++)
+	{
+		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
+}
+
 int main(int argc, int argv)
 {
 	// Init glfw
@@ -167,6 +193,51 @@ int main(int argc, int argv)
 		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f,0.0f, 1.0f, 0.0f // bottom-left        
 
 	};	
+
+	GLfloat skyboxVertices[] = {
+		// Positions          
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+
+		-1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f
+	};
 	
 	glm::vec3 pointLightPositions[] = {
 		glm::vec3(0.7f, 0.2f, 2.0f),
@@ -180,6 +251,10 @@ int main(int argc, int argv)
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);
 
+	GLuint skyboxVBO, skyboxVAO, skyboxTexture;
+	glGenBuffers(1, &skyboxVBO);
+	glGenVertexArrays(1, &skyboxVAO);
+
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -189,7 +264,7 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
-	glBindVertexArray(0);
+	glBindVertexArray(0);	
 
 	GLuint lightVAO;
 	glGenVertexArrays(1, &lightVAO);
@@ -198,16 +273,33 @@ int main(int argc, int argv)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);	
+	glBindVertexArray(0);
+
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);	
+	glBindVertexArray(0);
+
+	std::vector<const char*> faces;
+	faces.push_back("textures/skybox/right.jpg");
+	faces.push_back("textures/skybox/left.jpg");
+	faces.push_back("textures/skybox/top.jpg");
+	faces.push_back("textures/skybox/bottom.jpg");
+	faces.push_back("textures/skybox/back.jpg");
+	faces.push_back("textures/skybox/front.jpg");
+	skyboxTexture = loadCubemap(faces);
 
 	_cam = new Camera();
 
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
 	Shader colorShader = Shader("shaders/lamp.vert", "shaders/solidColor.frag");
+	Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
 	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/mdlLight.frag");	
 		
 
-	Model nanosuit = Model("models/nanosuit/nanosuit.obj");
+	//Model nanosuit = Model("models/nanosuit/nanosuit.obj");
 
 	// debug options
 	ImVec4 clear_color = ImColor(25, 25, 25);
@@ -250,6 +342,16 @@ int main(int argc, int argv)
 
 		view = _cam->getViewMatrix();
 		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+
+		glDepthMask(GL_FALSE);
+		skyboxShader.Use();
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader._program, "view"), 1 , GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(view))));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader._program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glBindVertexArray(skyboxVAO);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
 		
 		lampShader->Use();		
 
@@ -284,7 +386,7 @@ int main(int argc, int argv)
 		model = glm::mat4();
 		model = glm::translate(model, glm::vec3(1.0f, 0.0f, -5.0f));
 		glUniformMatrix4fv(glGetUniformLocation(colorShader._program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 36);		
 		glBindVertexArray(0);
 		
 
