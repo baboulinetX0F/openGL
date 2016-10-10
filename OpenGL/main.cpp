@@ -146,6 +146,7 @@ int main(int argc, int argv)
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+
 	// data pattern : [(vec3) vertex | (vec2) texCoord | (vec3) normalVector]
 	GLfloat vertices[] =
 	{
@@ -294,7 +295,7 @@ int main(int argc, int argv)
 	_cam = new Camera();
 
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
-	Shader colorShader = Shader("shaders/lamp.vert", "shaders/solidColor.frag");
+	Shader colorShader = Shader("shaders/reflectionTest.vert", "shaders/reflectionTest.frag");
 	Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
 	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/mdlLight.frag");	
 		
@@ -374,7 +375,9 @@ int main(int argc, int argv)
 		
 		
 		colorShader.Use();
-		glUniform3f(glGetUniformLocation(colorShader._program, "solidColor"), 1.0f, 0.0f, 0.0f);
+		//glUniform3f(glGetUniformLocation(colorShader._program, "solidColor"), 1.0f, 0.0f, 0.0f);
+		glUniform3f(glGetUniformLocation(colorShader._program, "cameraPos"), _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 
 		glBindVertexArray(VAO);
 		model = glm::mat4();
