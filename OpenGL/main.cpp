@@ -85,7 +85,7 @@ GLuint loadCubemap(std::vector<const char*> faces)
 	unsigned char* image;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-	for (GLint i = 0; i < faces.size(); i++)
+	for (GLuint i = 0; i < faces.size(); i++)
 	{
 		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
@@ -97,6 +97,33 @@ GLuint loadCubemap(std::vector<const char*> faces)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
+}
+
+// Generates a texture that is suited for attachments to a framebuffer
+GLuint generateAttachmentTexture(GLboolean depth, GLboolean stencil)
+{
+	// What enum to use?
+	GLenum attachment_type;
+	if (!depth && !stencil)
+		attachment_type = GL_RGB;
+	else if (depth && !stencil)
+		attachment_type = GL_DEPTH_COMPONENT;
+	else if (!depth && stencil)
+		attachment_type = GL_STENCIL_INDEX;
+
+	//Generate texture ID and load texture data 
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	if (!depth && !stencil)
+		glTexImage2D(GL_TEXTURE_2D, 0, attachment_type, 1280, 720, 0, attachment_type, GL_UNSIGNED_BYTE, NULL);
+	else // Using both a stencil and depth test, needs special format arguments
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 1280, 720, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return textureID;
 }
@@ -126,9 +153,7 @@ int main(int argc, int argv)
 	// Enable glewExperimental for modern techniques
 	glewExperimental = GL_TRUE;
 
-	ImGui_ImplGlfwGL3_Init(window, true);
-
-	glEnable(GL_STENCIL_TEST);	
+	ImGui_ImplGlfwGL3_Init(window, true);	
 	
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -239,6 +264,17 @@ int main(int argc, int argv)
 		-1.0f, -1.0f, 1.0f,
 		1.0f, -1.0f, 1.0f
 	};
+
+	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// Positions   // TexCoords
+		-1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+
+		-1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 1.0f
+	};
 	
 	glm::vec3 pointLightPositions[] = {
 		glm::vec3(0.7f, 0.2f, 2.0f),
@@ -247,6 +283,22 @@ int main(int argc, int argv)
 		glm::vec3(0.0f, 0.0f, -3.0f)
 	};
 
+	// alternate framebuffer
+	GLuint fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	GLuint textureColorbuffer = generateAttachmentTexture(false, false);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+	GLuint rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // Use a single renderbuffer object for both a depth AND stencil buffer.
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // Now actually attach it
+	// Now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	GLuint VBO, VAO;
 	glGenBuffers(1, &VBO);
@@ -255,6 +307,10 @@ int main(int argc, int argv)
 	GLuint skyboxVBO, skyboxVAO, skyboxTexture;
 	glGenBuffers(1, &skyboxVBO);
 	glGenVertexArrays(1, &skyboxVAO);
+
+	GLuint quadVBO, quadVAO;
+	glGenBuffers(1, &quadVBO);
+	glGenVertexArrays(1, &quadVAO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -276,12 +332,22 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);	
+	glBindVertexArray(0);
+
 	glBindVertexArray(skyboxVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);	
 	glBindVertexArray(0);
+
 
 	std::vector<const char*> faces;
 	faces.push_back("textures/skybox/right.jpg");
@@ -294,7 +360,9 @@ int main(int argc, int argv)
 
 	_cam = new Camera();
 
+	// Shaders Declarations
 	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
+	Shader screenShader = Shader("shaders/postProcessing/default.vert", "shaders/postProcessing/default.frag");
 	Shader colorShader = Shader("shaders/reflectionTest.vert", "shaders/reflectionTest.frag");
 	Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
 	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/mdlLight.frag");	
@@ -330,14 +398,14 @@ int main(int argc, int argv)
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		
 
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
-		glFrontFace(GL_CW);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glFrontFace(GL_CW);		
 
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);	
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
 		glm::mat4 view, projection, model;		
 
@@ -411,7 +479,7 @@ int main(int argc, int argv)
 		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
 		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 		glUniform3f(glGetUniformLocation(mdlShad._program, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
-
+		 
 		for (int i = 0; i < 4; i++)
 		{
 			std::ostringstream oss;
@@ -434,6 +502,18 @@ int main(int argc, int argv)
 		nanosuit.Draw(mdlShad);
 		*/
 		glDisable(GL_CULL_FACE);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+
+		screenShader.Use();
+		glBindVertexArray(quadVAO);
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);		
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
 		ImGui::Render();
 
 		glfwSwapBuffers(window);
@@ -442,6 +522,7 @@ int main(int argc, int argv)
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
+	glDeleteFramebuffers(1, &fbo);
 	glfwTerminate();
 	ImGui_ImplGlfwGL3_Shutdown();
 
