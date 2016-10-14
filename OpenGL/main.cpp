@@ -24,7 +24,7 @@ GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
 
 // test variables
-glm::vec3 mdlPos = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 mdlPos = glm::vec3(0.0f, 0.0f, 0.0f);
 bool debug_window = false;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -348,7 +348,6 @@ int main(int argc, int argv)
 	glEnableVertexAttribArray(0);	
 	glBindVertexArray(0);
 
-
 	std::vector<const char*> faces;
 	faces.push_back("textures/skybox/right.jpg");
 	faces.push_back("textures/skybox/left.jpg");
@@ -358,23 +357,39 @@ int main(int argc, int argv)
 	faces.push_back("textures/skybox/front.jpg");
 	skyboxTexture = loadCubemap(faces);
 
-	_cam = new Camera();
+	// Allocate memory to the matrices uniform buffer
+	GLuint uboMatrices;
+	glGenBuffers(1, &uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));	
+
+	_cam = new Camera();	
 
 	// Shaders Declarations
-	Shader* lampShader = new Shader("shaders/lamp.vert", "shaders/lamp.frag");
+	Shader* lampShader = new Shader("shaders/uniform_buffer/lamp.vert", "shaders/lamp.frag");
 	Shader screenShader = Shader("shaders/postProcessing/default.vert", "shaders/postProcessing/default.frag");
-	Shader colorShader = Shader("shaders/reflectionTest.vert", "shaders/reflectionTest.frag");
+	Shader colorShader = Shader("shaders/uniform_buffer/reflectionTest.vert", "shaders/reflectionTest.frag");
 	Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
 	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/mdlLight.frag");	
-		
 
-	//Model nanosuit = Model("models/nanosuit/nanosuit.obj");
+	GLuint uniformBlockIndexLamp = glGetUniformBlockIndex(lampShader->_program, "Matrices");
+	GLuint uniformBlockIndexCube = glGetUniformBlockIndex(colorShader._program, "Matrices");
+
+	glUniformBlockBinding(lampShader->_program, uniformBlockIndexLamp, 0);
+	glUniformBlockBinding(colorShader._program, uniformBlockIndexCube, 0);
+
+	Model nanosuit = Model("models/planet/planet.obj");	
 
 	// debug options
 	ImVec4 clear_color = ImColor(25, 25, 25);
 		
 	// Wireframe mode
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
@@ -410,7 +425,15 @@ int main(int argc, int argv)
 		glm::mat4 view, projection, model;		
 
 		view = _cam->getViewMatrix();
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);	
+		
 
 		glDepthMask(GL_FALSE);
 		skyboxShader.Use();
@@ -424,11 +447,7 @@ int main(int argc, int argv)
 		
 		lampShader->Use();		
 
-		GLuint modelLoc = glGetUniformLocation(lampShader->_program, "model");
-		GLuint viewLoc = glGetUniformLocation(lampShader->_program, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		GLuint projLoc = glGetUniformLocation(lampShader->_program, "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		GLuint modelLoc = glGetUniformLocation(lampShader->_program, "model");		
 
 		glBindVertexArray(lightVAO);
 		for (int i = 0; i < 4; i++)
@@ -450,9 +469,7 @@ int main(int argc, int argv)
 		glBindVertexArray(VAO);
 		model = glm::mat4();
 		model = glm::translate(model, glm::vec3(0.0f,0.0f,-3.0f));		
-		glUniformMatrix4fv(glGetUniformLocation(colorShader._program,"model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(colorShader._program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(glGetUniformLocation(colorShader._program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(colorShader._program,"model"), 1, GL_FALSE, glm::value_ptr(model));		
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		model = glm::mat4();
 		model = glm::translate(model, glm::vec3(1.0f, 0.0f, -5.0f));
@@ -462,15 +479,15 @@ int main(int argc, int argv)
 		
 
 		// model drawing
-		/*
+		
 		mdlShad.Use();			
 
 		modelLoc = glGetUniformLocation(mdlShad._program, "model");
 
-		viewLoc = glGetUniformLocation(mdlShad._program, "view");
+		GLuint viewLoc = glGetUniformLocation(mdlShad._program, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-		projLoc = glGetUniformLocation(mdlShad._program, "projection");
+		GLuint projLoc = glGetUniformLocation(mdlShad._program, "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glUniform3f(glGetUniformLocation(mdlShad._program, "viewPos"), _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
@@ -496,11 +513,11 @@ int main(int argc, int argv)
 		
 		model = glm::mat4();
 		model = glm::translate(model, mdlPos);
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		//model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		nanosuit.Draw(mdlShad);
-		*/
+		
 		glDisable(GL_CULL_FACE);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
