@@ -27,13 +27,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -69,8 +69,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Baboulinet\Documents\GitHub\OpenGL\IMGui;C:\Users\Baboulinet\Programmation\C++\libs\assimp-3.3.1\include;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;C:\Users\Baboulinet\Programmation\C++\libs\glm\glm;C:\Users\Baboulinet\Programmation\C++\libs\SOIL\src;D:\x0f_dev\soft_dev\C++\libs\glm;D:\x0f_dev\soft_dev\C++\libs\SOIL\src;D:\x0f_dev\soft_dev\C++\libs\glew-2.0.0\include;D:\x0f_dev\soft_dev\C++\libs\GLFW\include;$(IncludePath);$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Baboulinet\Documents\GitHub\OpenGL\Release;C:\Users\Baboulinet\Programmation\C++\libs\assimp-3.3.1\build\code\Debug;C:\Users\Baboulinet\Programmation\C++\libs\SOIL\lib;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\lib;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\x0f_dev\GitHub\OpenGL\IMGui;D:\x0f_dev\libs\assimp-3.3.1\include;D:\x0f_dev\libs\Simple OpenGL Image Library\src;D:\x0f_dev\libs\glm\glm;D:\x0f_dev\libs\glew-2.0.0\include;D:\x0f_dev\libs\glfw-3.2.1.bin.WIN32\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\x0f_dev\libs\assimp-3.3.1\lib\Debug;D:\x0f_dev\GitHub\OpenGL\Debug;D:\x0f_dev\GitHub\OpenGL\OpenGL;D:\x0f_dev\libs\assimp-3.3.1\bin\Debug;D:\x0f_dev\libs\Simple OpenGL Image Library\lib;D:\x0f_dev\libs\glew-2.0.0\lib\Release\Win32;D:\x0f_dev\libs\glfw-3.2.1.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\Baboulinet\Documents\GitHub\OpenGL\IMGui;C:\Users\Baboulinet\Programmation\C++\libs\assimp-3.3.1\include;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;C:\Users\Baboulinet\Programmation\C++\libs\glm\glm;C:\Users\Baboulinet\Programmation\C++\libs\SOIL\src;C:\Users\Baboulinet\Programmation\C++\libs\glm\glm;C:\Users\Baboulinet\Programmation\C++\libs\SOIL\src;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;$(IncludePath);$(IncludePath)</IncludePath>
@@ -84,7 +84,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>IMGui.lib;assimp-vc120-mt.lib;SOIL.lib;glew32s.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>IMGui.lib;assimp-vc140-mt.lib;SOIL.lib;glew32s.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

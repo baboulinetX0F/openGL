@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -40,8 +40,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\libs;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\x0f_dev\libs\assimp-3.3.1\code;D:\x0f_dev\libs\Simple OpenGL Image Library\src;D:\x0f_dev\libs\glm\glm;D:\x0f_dev\libs\glew-2.0.0\include;D:\x0f_dev\libs\glfw-3.2.1.bin.WIN32\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\x0f_dev\libs\assimp-3.3.1\bin\Debug;D:\x0f_dev\libs\Simple OpenGL Image Library\lib;D:\x0f_dev\libs\glew-2.0.0\lib\Release\Win32;D:\x0f_dev\libs\glfw-3.2.1.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\Baboulinet\Programmation\C++\libs\glfw-3.2.1\include;C:\Users\Baboulinet\Programmation\C++\libs\GLEW\include;$(IncludePath)</IncludePath>

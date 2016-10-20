@@ -81,14 +81,14 @@ GLuint loadCubemap(std::vector<const char*> faces)
 	glGenTextures(1, &textureID);
 	glActiveTexture(GL_TEXTURE0);
 
-	int width, height;
+	int width, height,channel;
 	unsigned char* image;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 	for (GLuint i = 0; i < faces.size(); i++)
 	{
-		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		image = SOIL_load_image(faces[i], &width, &height, &channel, SOIL_LOAD_RGBA);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);		
 	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -349,12 +349,12 @@ int main(int argc, int argv)
 	glBindVertexArray(0);
 
 	std::vector<const char*> faces;
-	faces.push_back("textures/skybox/right.jpg");
-	faces.push_back("textures/skybox/left.jpg");
-	faces.push_back("textures/skybox/top.jpg");
-	faces.push_back("textures/skybox/bottom.jpg");
-	faces.push_back("textures/skybox/back.jpg");
-	faces.push_back("textures/skybox/front.jpg");
+	faces.push_back("textures/ame_nebula/right.tga");
+	faces.push_back("textures/ame_nebula/left.tga");
+	faces.push_back("textures/ame_nebula/top.tga");
+	faces.push_back("textures/ame_nebula/bottom.tga");
+	faces.push_back("textures/ame_nebula/back.tga");
+	faces.push_back("textures/ame_nebula/front.tga");
 	skyboxTexture = loadCubemap(faces);
 
 	// Allocate memory to the matrices uniform buffer
@@ -512,8 +512,8 @@ int main(int argc, int argv)
 		}
 		
 		model = glm::mat4();
-		model = glm::translate(model, mdlPos);
-		//model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, mdlPos);		
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		nanosuit.Draw(mdlShad);
