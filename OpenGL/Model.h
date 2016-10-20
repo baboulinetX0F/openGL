@@ -11,6 +11,8 @@ class Model
 public:
 	Model(GLchar* path);
 	void Draw(Shader shader);
+	std::vector<Mesh> getMeshes();
+	std::vector<Texture> getTexturesLoaded();
 private:
 	std::vector<Mesh> meshes;
 	std::string directory;

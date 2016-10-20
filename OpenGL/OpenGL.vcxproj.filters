@@ -19,6 +19,15 @@
     <Filter Include="Fichiers de ressources\Textures">
       <UniqueIdentifier>{2f1a273e-75ea-48e3-aed8-35d89210a70a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\Shaders\model_shaders">
+      <UniqueIdentifier>{d6b47d15-0840-4052-aabd-cfafd05a6213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\Shaders\post_processing">
+      <UniqueIdentifier>{f05a3af9-9ab0-4d7a-98c0-c513162be569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\Shaders\uniform_buffer">
+      <UniqueIdentifier>{3c785b79-0c1c-4775-b1b7-f4178a990ed4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -110,6 +119,39 @@
     </None>
     <None Include="shaders\light_casters\directionalLighting.frag">
       <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shaders\model_shaders\default.frag">
+      <Filter>Fichiers sources\Shaders\model_shaders</Filter>
+    </None>
+    <None Include="shaders\model_shaders\default.vert">
+      <Filter>Fichiers sources\Shaders\model_shaders</Filter>
+    </None>
+    <None Include="shaders\model_shaders\default_instanced.vert">
+      <Filter>Fichiers sources\Shaders\model_shaders</Filter>
+    </None>
+    <None Include="shaders\model_shaders\mdlLight.frag">
+      <Filter>Fichiers sources\Shaders\model_shaders</Filter>
+    </None>
+    <None Include="shaders\postProcessing\default.frag">
+      <Filter>Fichiers sources\Shaders\post_processing</Filter>
+    </None>
+    <None Include="shaders\postProcessing\default.vert">
+      <Filter>Fichiers sources\Shaders\post_processing</Filter>
+    </None>
+    <None Include="shaders\postProcessing\sharpen.frag">
+      <Filter>Fichiers sources\Shaders\post_processing</Filter>
+    </None>
+    <None Include="shaders\postProcessing\test.frag">
+      <Filter>Fichiers sources\Shaders\post_processing</Filter>
+    </None>
+    <None Include="shaders\uniform_buffer\default.vert">
+      <Filter>Fichiers sources\Shaders\uniform_buffer</Filter>
+    </None>
+    <None Include="shaders\uniform_buffer\lamp.vert">
+      <Filter>Fichiers sources\Shaders\uniform_buffer</Filter>
+    </None>
+    <None Include="shaders\uniform_buffer\reflectionTest.vert">
+      <Filter>Fichiers sources\Shaders\uniform_buffer</Filter>
     </None>
   </ItemGroup>
 </Project>

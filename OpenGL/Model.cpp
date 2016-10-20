@@ -14,6 +14,16 @@ void Model::Draw(Shader shader)
 			this->meshes[i].Draw(shader);	
 }
 
+std::vector<Mesh> Model::getMeshes()
+{
+	return this->meshes;
+}
+
+std::vector<Texture> Model::getTexturesLoaded()
+{
+	return textures_loaded;
+}
+
 void Model::loadModel(std::string path)
 {
 	Assimp::Importer importer;

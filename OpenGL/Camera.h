@@ -16,7 +16,7 @@ enum CameraDirection
 // Default values
 const GLfloat YAW = -90.0f;
 const GLfloat PITCH = 0.0f;
-const GLfloat MOVE_SPEED = 0.05f;
+const GLfloat MOVE_SPEED = 0.15f;
 const GLfloat MOUSE_SENS = 0.05f;
 
 class Camera

@@ -76,3 +76,8 @@ void Mesh::Draw(Shader shader)
 	}
 
 }
+
+GLuint Mesh::getVAO()
+{
+	return this->_VAO;
+}

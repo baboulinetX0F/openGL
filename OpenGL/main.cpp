@@ -374,6 +374,7 @@ int main(int argc, int argv)
 	Shader colorShader = Shader("shaders/uniform_buffer/reflectionTest.vert", "shaders/reflectionTest.frag");
 	Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
 	Shader mdlShad = Shader("shaders/model_shaders/default.vert", "shaders/model_shaders/mdlLight.frag");	
+	Shader instanceShad = Shader("shaders/model_shaders/default_instanced.vert", "shaders/model_shaders/default.frag");
 
 	GLuint uniformBlockIndexLamp = glGetUniformBlockIndex(lampShader->_program, "Matrices");
 	GLuint uniformBlockIndexCube = glGetUniformBlockIndex(colorShader._program, "Matrices");
@@ -381,15 +382,70 @@ int main(int argc, int argv)
 	glUniformBlockBinding(lampShader->_program, uniformBlockIndexLamp, 0);
 	glUniformBlockBinding(colorShader._program, uniformBlockIndexCube, 0);
 
-	Model nanosuit = Model("models/planet/planet.obj");	
+	Model planet = Model("models/planet/planet.obj");	
+	Model rock = Model("models/asteroid/rock.obj");
+
+	GLuint amount = 1000;
+	glm::mat4* modelMatrices;
+	modelMatrices = new glm::mat4[amount];
+	srand(glfwGetTime()); // initialize random seed	
+	GLfloat radius = 50.0;
+	GLfloat offset = 2.5f;
+	for (GLuint i = 0; i < amount; i++)
+	{
+		glm::mat4 model;
+		// 1. Translation: displace along circle with 'radius' in range [-offset, offset]
+		GLfloat angle = (GLfloat)i / (GLfloat)amount * 360.0f;
+		GLfloat displacement = (rand() % (GLint)(2 * offset * 100)) / 100.0f - offset;
+		GLfloat x = sin(angle) * radius + displacement;
+		displacement = (rand() % (GLint)(2 * offset * 100)) / 100.0f - offset;
+		GLfloat y = displacement * 0.4f; // y value has smaller displacement
+		displacement = (rand() % (GLint)(2 * offset * 100)) / 100.0f - offset;
+		GLfloat z = cos(angle) * radius + displacement;
+		model = glm::translate(model, glm::vec3(x, y, z));
+		// 2. Scale: Scale between 0.05 and 0.25f
+		GLfloat scale = (rand() % 20) / 100.0f + 0.05;
+		model = glm::scale(model, glm::vec3(scale));
+		// 3. Rotation: add random rotation around a (semi)randomly picked rotation axis vector
+		GLfloat rotAngle = (rand() % 360);
+		model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+		// 4. Now add to list of matrices
+		modelMatrices[i] = model;
+	}
+
+	// create the instance models for the rock
+	GLuint instanceBuffer;
+	glGenBuffers(1, &instanceBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4)*amount, &modelMatrices[0], GL_STATIC_DRAW);
+
+	for (int i = 0; i < rock.getMeshes().size(); i++)
+	{
+		GLuint iVAO = rock.getMeshes()[i].getVAO();
+		GLuint size = sizeof(glm::vec4);
+		glBindVertexArray(iVAO);
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*) 0);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)size);
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(2*size));
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(3 * size));
+
+		glVertexAttribDivisor(3, 1);
+		glVertexAttribDivisor(4, 1);
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+
+		glBindVertexArray(0);
+	}
 
 	// debug options
 	ImVec4 clear_color = ImColor(25, 25, 25);
 		
 	// Wireframe mode
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	glEnable(GL_PROGRAM_POINT_SIZE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
@@ -400,18 +456,12 @@ int main(int argc, int argv)
 
 		//TODO: Remove cursor when debug window is not displayed 
 		if (debug_window)
-		{
-			//static float f = 0.0f;
-			//ImGui::Text("Hello, world!");
-			//ImGui::SliderFloat("float", &f, 0.0f, 1.0f);			
-			ImGui::ColorEdit3("clear color", (float*)&clear_color);
-			//if (ImGui::Button("Test Window")) show_test_window ^= 1;
-			//if (ImGui::Button("Another Window")) show_another_window ^= 1;
+		{				
+			ImGui::ColorEdit3("clear color", (float*)&clear_color);			
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		}
 		else
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);		
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glEnable(GL_DEPTH_TEST);
@@ -422,7 +472,8 @@ int main(int argc, int argv)
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
-		glm::mat4 view, projection, model;		
+		glm::mat4 view, projection, model;
+		GLuint modelLoc;
 
 		view = _cam->getViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -432,8 +483,7 @@ int main(int argc, int argv)
 		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);	
-		
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);			
 
 		glDepthMask(GL_FALSE);
 		skyboxShader.Use();
@@ -445,9 +495,9 @@ int main(int argc, int argv)
 		glBindVertexArray(0);
 		glDepthMask(GL_TRUE);
 		
-		lampShader->Use();		
+		/*lampShader->Use();		
 
-		GLuint modelLoc = glGetUniformLocation(lampShader->_program, "model");		
+		modelLoc = glGetUniformLocation(lampShader->_program, "model");		
 
 		glBindVertexArray(lightVAO);
 		for (int i = 0; i < 4; i++)
@@ -458,9 +508,9 @@ int main(int argc, int argv)
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		glBindVertexArray(0);
+		glBindVertexArray(0);*/		
 		
-		
+		/*
 		colorShader.Use();
 		//glUniform3f(glGetUniformLocation(colorShader._program, "solidColor"), 1.0f, 0.0f, 0.0f);
 		glUniform3f(glGetUniformLocation(colorShader._program, "cameraPos"), _cam->_pos.x, _cam->_pos.y, _cam->_pos.z);
@@ -476,10 +526,9 @@ int main(int argc, int argv)
 		glUniformMatrix4fv(glGetUniformLocation(colorShader._program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);		
 		glBindVertexArray(0);
+		*/
 		
-
-		// model drawing
-		
+		// model drawing		
 		mdlShad.Use();			
 
 		modelLoc = glGetUniformLocation(mdlShad._program, "model");
@@ -512,13 +561,28 @@ int main(int argc, int argv)
 		}
 		
 		model = glm::mat4();
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::translate(model, mdlPos);		
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-		nanosuit.Draw(mdlShad);
-		
 		glDisable(GL_CULL_FACE);
+
+		planet.Draw(mdlShad);
+		
+		instanceShad.Use();
+		viewLoc = glGetUniformLocation(instanceShad._program, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+		projLoc = glGetUniformLocation(instanceShad._program, "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		glBindTexture(GL_TEXTURE_2D, rock.getTexturesLoaded()[0].id);
+
+		for (int i = 0; i < rock.getMeshes().size(); i++)
+		{
+			glBindVertexArray(rock.getMeshes()[i].getVAO());
+			glDrawElementsInstanced(GL_TRIANGLES, rock.getMeshes()[i]._indices.size(), GL_UNSIGNED_INT, 0, amount);
+			glBindVertexArray(0);
+		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);

@@ -156,11 +156,22 @@
     <None Include="shaders\materialLSEMap.frag" />
     <None Include="shaders\materialPhong.frag" />
     <None Include="shaders\materialPhong.vert" />
+    <None Include="shaders\model_shaders\default.frag" />
+    <None Include="shaders\model_shaders\default.vert" />
+    <None Include="shaders\model_shaders\default_instanced.vert" />
+    <None Include="shaders\model_shaders\mdlLight.frag" />
     <None Include="shaders\phongLightingTex.frag" />
     <None Include="shaders\phongLightingTex.vert" />
+    <None Include="shaders\postProcessing\default.frag" />
+    <None Include="shaders\postProcessing\default.vert" />
+    <None Include="shaders\postProcessing\sharpen.frag" />
+    <None Include="shaders\postProcessing\test.frag" />
     <None Include="shaders\textured.frag" />
     <None Include="shaders\textured.vert" />
     <None Include="shaders\texturedLightTest.frag" />
+    <None Include="shaders\uniform_buffer\default.vert" />
+    <None Include="shaders\uniform_buffer\lamp.vert" />
+    <None Include="shaders\uniform_buffer\reflectionTest.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
