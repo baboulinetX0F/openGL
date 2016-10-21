@@ -138,6 +138,7 @@ int main(int argc, int argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "openGL", nullptr, nullptr);
 	if (window == nullptr)
@@ -446,6 +447,7 @@ int main(int argc, int argv)
 		
 	// Wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	
+	glEnable(GL_MULTISAMPLE);
 
 	// Main Loop
 	while (!glfwWindowShouldClose(window))
